@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pothole Scanner</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+  </div>
+  <div>
+    <div class="app-name">Pothole Scanner</div>
+    <div class="app-sub">AI Multi-Pothole Detection</div>
+  </div>
+  <a href="reports.html" class="db-link">📋 Reports</a>
+</header>
+
+<div class="steps">
+  <div class="step active" id="s1">1. Name</div>
+  <div class="step-arrow">›</div>
+  <div class="step" id="s2">2. Image</div>
+  <div class="step-arrow">›</div>
+  <div class="step" id="s3">3. AI Scan</div>
+  <div class="step-arrow">›</div>
+  <div class="step" id="s4">4. Report</div>
+</div>
+
+<div class="container">
+
+  <!-- STEP 1: Name -->
+  <div id="step1" class="card">
+    <div class="card-icon" style="background:#1e3a5f">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+    </div>
+    <h2>Who are you?</h2>
+    <p class="sub">Enter your name to begin scanning</p>
+    <input type="text" id="userName" placeholder="Your full name..."/>
+    <button class="btn primary" onclick="goStep2()">Continue →</button>
+  </div>
+
+  <!-- STEP 2: Camera OR Upload -->
+  <div id="step2" class="card hidden">
+    <div class="card-icon" style="background:#3d2200">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+    </div>
+    <h2>Add Image</h2>
+    <p class="sub">Use camera or upload a photo — AI will detect all potholes</p>
+
+    <!-- Toggle: Camera / Upload -->
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="modeCamera" onclick="switchMode('camera')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Camera
+      </button>
+      <button class="mode-btn" id="modeUpload" onclick="switchMode('upload')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload
+      </button>
+    </div>
+
+    <!-- Camera Panel -->
+    <div id="cameraPanel">
+      <div class="cam-box">
+        <video id="video" autoplay playsinline muted></video>
+        <div class="cam-corner c-tl"></div><div class="cam-corner c-tr"></div>
+        <div class="cam-corner c-bl"></div><div class="cam-corner c-br"></div>
+        <div class="scanline"></div>
+        <div class="cam-tip">Point at road surface</div>
+      </div>
+      <canvas id="canvas"></canvas>
+      <div class="row">
+        <button class="btn outline" onclick="goStep1()">← Back</button>
+        <button class="btn primary" onclick="captureFromCamera()" style="flex:2">📷 Capture</button>
+      </div>
+    </div>
+
+    <!-- Upload Panel -->
+    <div id="uploadPanel" class="hidden">
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="dragOver(event)" ondrop="dropFile(event)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <div class="upload-text">Click or drag & drop image here</div>
+        <div class="upload-hint">JPG, PNG, WEBP supported</div>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(event)"/>
+      <div id="uploadPreviewWrap" class="hidden" style="margin-top:12px;">
+        <img id="uploadPreview" style="width:100%;border-radius:12px;display:block;margin-bottom:12px;"/>
+        <div class="row">
+          <button class="btn outline" onclick="clearUpload()">✕ Clear</button>
+          <button class="btn primary" onclick="useUploadedImage()" style="flex:2">✓ Use This Image</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn outline" onclick="goStep1()">← Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: AI Analyzing -->
+  <div id="step3" class="card hidden">
+    <h2>AI Scanning...</h2>
+    <p class="sub">Claude Vision is detecting all potholes in the image</p>
+    <img id="previewImg" style="width:100%;border-radius:12px;margin-bottom:18px;"/>
+    <div class="ai-status">
+      <div class="ai-spinner"></div>
+      <div id="aiStatusText">Sending to AI for analysis...</div>
+    </div>
+    <div class="check-list" style="margin-top:16px;">
+      <div class="check-row"><div class="dot wait" id="d1"></div> Verifying road surface</div>
+      <div class="check-row"><div class="dot wait" id="d2"></div> Detecting pothole count &amp; locations</div>
+      <div class="check-row"><div class="dot wait" id="d3"></div> Measuring each pothole</div>
+      <div class="check-row"><div class="dot wait" id="d4"></div> GPS coordinates</div>
+    </div>
+  </div>
+
+  <!-- STEP 3b: Rejected by AI -->
+  <div id="stepReject" class="card hidden">
+    <div class="reject-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" width="36" height="36">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+    </div>
+    <h2 style="color:#f87171;margin-bottom:8px;">Not a Pothole!</h2>
+    <p class="sub" id="rejectMsg">No pothole detected in the image.</p>
+    <img id="rejectImg" style="width:100%;border-radius:12px;margin-bottom:16px;opacity:0.5;"/>
+    <button class="btn primary" onclick="retry()">🔄 Try Again</button>
+  </div>
+
+  <!-- STEP 4: Results -->
+  <div id="step4" class="card hidden">
+    <div class="card-icon" style="background:#0d3322">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </div>
+
+    <!-- Summary bar -->
+    <div class="summary-bar">
+      <div class="summary-item">
+        <div class="summary-num" id="potholeCount">0</div>
+        <div class="summary-lbl">Potholes</div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-item">
+        <div class="summary-num" id="worstSev">—</div>
+        <div class="summary-lbl">Worst</div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-item">
+        <div class="summary-num" id="avgConf">—</div>
+        <div class="summary-lbl">Confidence</div>
+      </div>
+    </div>
+
+    <!-- Annotated image -->
+    <div style="position:relative;margin-bottom:16px;">
+      <img id="resultImg" style="width:100%;border-radius:12px;display:block;"/>
+      <canvas id="annotateCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;"></canvas>
+    </div>
+
+    <!-- Each pothole card -->
+    <div class="section-title">🕳️ Detected Potholes</div>
+    <div id="potholeCards"></div>
+
+    <!-- Total measurements -->
+    <div class="section-title" style="margin-top:16px;">📐 Total Measurements</div>
+    <div class="measure-grid">
+      <div class="mbox blue-b"><div class="mval" id="tDiam">—</div><div class="mlbl">Avg Diameter</div></div>
+      <div class="mbox orange-b"><div class="mval" id="tArea">—</div><div class="mlbl">Total Area</div></div>
+      <div class="mbox red-b"><div class="mval" id="tDepth">—</div><div class="mlbl">Max Depth</div></div>
+      <div class="mbox green-b"><div class="mval" id="tPerim">—</div><div class="mlbl">Avg Perimeter</div></div>
+    </div>
+
+    <!-- Location info -->
+    <div class="section-title" style="margin-top:16px;">📋 Report Details</div>
+    <div class="info-list">
+      <div class="info-row"><span class="ilabel">Reporter</span><span class="ivalue" id="rName">—</span></div>
+      <div class="info-row"><span class="ilabel">Address</span><span class="ivalue" id="rAddr">Fetching...</span></div>
+      <div class="info-row"><span class="ilabel">GPS</span><span class="ivalue" id="rGPS">—</span></div>
+      <div class="info-row"><span class="ilabel">Time</span><span class="ivalue" id="rTime">—</span></div>
+    </div>
+
+    <div class="row" style="margin-top:16px;">
+      <button class="btn outline" onclick="goStep1()">🔄 New Scan</button>
+      <button class="btn primary" onclick="saveReport()" style="flex:1.5">💾 Save Report</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden">
+    ✅ Saved! <a href="reports.html">View Reports →</a>
+  </div>
+
+</div>
+<script src="script.js"></script>
+</body>
+</html>

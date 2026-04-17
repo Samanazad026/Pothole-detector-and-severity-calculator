@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reports – Pothole Scanner</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+      <ellipse cx="12" cy="5" rx="9" ry="3"/>
+      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+    </svg>
+  </div>
+  <div>
+    <div class="app-name">Reports Database</div>
+    <div class="app-sub">All AI-verified pothole reports</div>
+  </div>
+  <a href="index.html" class="db-link">📷 New Scan</a>
+</header>
+
+<div class="container">
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div><div class="stat-num" id="statReports">0</div><div class="stat-label">Reports</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon orange">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/></svg>
+      </div>
+      <div><div class="stat-num" id="statPotholes">0</div><div class="stat-label">Potholes</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      </div>
+      <div><div class="stat-num" id="statPeople">0</div><div class="stat-label">Reporters</div></div>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="Search name, address, severity..." oninput="filter()"/>
+    </div>
+    <button class="btn-clear" onclick="clearAll()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+      Clear All
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="reports-header">
+      <div class="reports-title">Saved Reports</div>
+      <span class="count-badge" id="countBadge">0</span>
+    </div>
+    <div id="emptyState" class="empty-state hidden">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+      <p>No reports yet</p>
+      <a href="index.html" class="btn primary" style="display:inline-flex;width:auto;padding:10px 20px;font-size:13px;">Start Scanning</a>
+    </div>
+    <div id="reportList"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal-overlay hidden" onclick="closeModal(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <img id="mPhoto" alt="pothole"/>
+    <div class="modal-body">
+      <div class="modal-row"><div class="modal-label">Reporter</div><div class="modal-value" id="mName"></div></div>
+      <div class="modal-row"><div class="modal-label">Overall Severity</div><div class="modal-value" id="mSev"></div></div>
+      <div class="modal-row"><div class="modal-label">Road Condition</div><div class="modal-value" id="mRoad"></div></div>
+      <div class="modal-row"><div class="modal-label">Recommendation</div><div class="modal-value" id="mRec"></div></div>
+
+      <div class="modal-section">📐 Totals</div>
+      <div class="meas-grid" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="meas-cell"><div class="meas-val" id="mCount">—</div><div class="meas-lbl">Potholes</div></div>
+        <div class="meas-cell"><div class="meas-val" id="mArea">—</div><div class="meas-lbl">Total Area</div></div>
+        <div class="meas-cell"><div class="meas-val" id="mDepth">—</div><div class="meas-lbl">Max Depth</div></div>
+      </div>
+
+      <div class="modal-section">🕳️ Each Pothole</div>
+      <div id="mPotholes"></div>
+
+      <div class="modal-row" style="margin-top:8px;"><div class="modal-label">Address</div><div class="modal-value" id="mAddr"></div></div>
+      <div class="modal-row"><div class="modal-label">GPS</div><a class="modal-value modal-link" id="mGPS" href="#" target="_blank"></a></div>
+      <div class="modal-row"><div class="modal-label">Date & Time</div><div class="modal-value" id="mTime"></div></div>
+
+      <div class="modal-actions">
+        <a class="btn primary" id="mMapBtn" href="#" target="_blank">📍 Maps</a>
+        <button class="btn outline" id="mDelBtn">🗑️ Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="reports.js"></script>
+</body>
+</html>
