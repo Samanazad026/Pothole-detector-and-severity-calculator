@@ -7,7 +7,7 @@ async function detectPotholes(canvas) {
     console.log("Sending image to Roboflow YOLOv8 Cloud API...");
 
     // 🛑 UPDATED MODEL URL 🛑
-const ROBOFLOW_API_URL = "https://detect.roboflow.com/pothole-clzln/1?api_key=rf_hqXzzqabRRffvWLlZidjiiJq9cv1";
+const ROBOFLOW_API_URL = "https://detect.roboflow.com/pothole-clzln/1?api_key=rf_hqXzzqabRRffvWLlZidjiiJq9cv1&confidence=15";
 
     try {
         const response = await fetch(ROBOFLOW_API_URL, {
